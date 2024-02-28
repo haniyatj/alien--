@@ -37,8 +37,8 @@ graph.add_edge('Cairo', 'Giza', 9)
 graph.add_edge('Luxor', 'Alexandria', 4)
 graph.add_edge('Giza', 'Alexandria', 2)
 
-for node_state, node in graph.nodes.items():
-    print(f"City: {node_state}, Neighbours: {node.actions}")
+for node, node in graph.nodes.items():
+    print(f"City: {node.state}, Neighbours: {node.actions}")
 
 
 
