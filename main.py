@@ -21,19 +21,37 @@ class graph: #will have city nodes with connected edges representing the distanc
          self.nodes[node1].actions.append((node2,distance))
          self.nodes[node2].actions.append((node1,distance))
 
-    def dfs(self,start,end): #under consrtuciton
+    def dfs(self,start,end): #under consrtuciton gpted
         if start not in self.nodes or end not in self.nodes:
            print("No such start and end node found in graph")
            return None
         
+         # Reset visited flags
+        for node in self.nodes.values():
+            node.visited = False
+
+        path = self.dfs_helper(start, end, [])
+        return path
+
+    def dfs_helper(self, current, end, path):
+        if current == end:
+            return path + [current]
+
+        self.nodes[current].visited = True
+
+        for neighbor, _ in self.nodes[current].actions:
+            if not self.nodes[neighbor].visited:
+                new_path = self.dfs_helper(neighbor, end, path + [current])
+                if new_path:
+                    return new_path
+
+        return None
 
     def spawn_aliens(self,route): #spawn random aliens bw 10-80 on dfs path nodes
         for node in route:
          self.nodes[node].aliens=random.randint(10,80)
 
-        
-        
-
+                
 city_list = {
 'Cairo': city('Cairo'),
 'Luxor': city('Luxor'),
