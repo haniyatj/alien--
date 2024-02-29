@@ -1,5 +1,6 @@
 import random 
-
+import networkx as nx
+import matplotlib.pyplot as plt
 class city: #each city representing a graph node 
     def __init__(self,state,parent=None,actions=None,military=False,civilians=0,aliens=0):
         self.state=state
@@ -51,13 +52,40 @@ class graph: #will have city nodes with connected edges representing the distanc
         for node in route:
          self.nodes[node].aliens=random.randint(10,80)
 
-                
-city_list = {
-'Cairo': city('Cairo'),
-'Luxor': city('Luxor'),
-'Giza': city('Giza'),
-'Alexandria': city('Alexandria'),
 
+    def set_militarybase(self, percentage=100):
+        num_militaryBases = int(len(self.nodes) * (percentage / 100))
+    
+        cities = [city for city_name, city in self.nodes.items() if city_name != 'Alexandria']
+    
+        cities_having_militaryBases = random.sample(cities, min(num_militaryBases, len(cities)))
+
+        for city in cities_having_militaryBases:
+            city.military = True  
+
+    def print_all_nodes_data(self):
+        for city_name, city_obj in self.nodes.items():
+            print(f"City: {city_name}")
+            print(f"  Civilans: {city_obj.civilans}")
+            print(f"  Military: {city_obj.military}")
+            print(f"  Aliens: {city_obj.aliens}")
+            print(f"  Actions (Connections): {city_obj.actions}")
+            print("----------")
+city_list = {
+    'Ismailia': city('Ismailia'),
+    'Suez': city('Suez'),
+    'Asyut': city('Asyut'),
+    'Sohag': city('Sohag'),
+    'Beni Suef': city('Beni Suef'),
+    'Port Said': city('Port Said'),
+    'Cairo': city('Cairo'),
+    'Luxor': city('Luxor'),
+    'Giza': city('Giza'),
+    'Alexandria': city('Alexandria'),
+    'Aswan': city('Aswan'),
+    'Sharm El-Sheikh': city('Sharm El-Sheikh'),
+    'Hurghada': city('Hurghada'),
+    'Marsa Matruh': city('Marsa Matruh'),
     }
 
 
@@ -66,13 +94,47 @@ graph = graph()
 for node in  city_list.values():
     graph.add_node(node)
 
-graph.add_edge('Cairo', 'Luxor', 6)
-graph.add_edge('Cairo', 'Giza', 9)
-graph.add_edge('Luxor', 'Alexandria', 4)
-graph.add_edge('Giza', 'Alexandria', 2)
+graph.add_edge('Cairo', 'Asyut', 5)
+graph.add_edge('Luxor', 'Aswan', 3)
+graph.add_edge('Giza', 'Beni Suef', 2)
+graph.add_edge('Alexandria', 'Marsa Matruh', 4)
+graph.add_edge('Suez', 'Ismailia', 1)
+graph.add_edge('Port Said', 'Ismailia', 2)
+graph.add_edge('Sharm El-Sheikh', 'Hurghada', 5)
+graph.add_edge('Aswan', 'Sohag', 4)
+graph.add_edge('Marsa Matruh', 'Alexandria', 3)  
+graph.add_edge('Sohag', 'Asyut', 3)
 
-for node, node in graph.nodes.items():
-    print(f"City: {node.state}, Neighbours: {node.actions}")
+
+graph.set_militarybase()
+graph.print_all_nodes_data()
+
+
+"""# Create a NetworkX graph
+G = nx.Graph()
+
+# Add nodes to the graph
+for node in graph.nodes.values():
+    G.add_node(node.state)
+
+# Add edges to the graph
+for node_state, node in graph.nodes.items():
+    for neighbor, distance in node.actions:
+        G.add_edge(node_state, neighbor, weight=distance)
+
+# Draw the graph
+pos = nx.spring_layout(G)  # Positions for all nodes
+nx.draw(G, pos, with_labels=True, node_size=5000, node_color="skyblue", font_size=10, font_weight="bold")
+
+# Add edge labels
+edge_labels = {(u, v): d['weight'] for u, v, d in G.edges(data=True)}
+nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
+
+# Show the graph
+plt.title('Graph Visualization')
+plt.show()"""
+
+
 
 
 
