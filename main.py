@@ -72,20 +72,28 @@ class graph: #will have city nodes with connected edges representing the distanc
             print(f"  Actions (Connections): {city_obj.actions}")
             print("----------")
 city_list = {
-    'Ismailia': city('Ismailia'),
-    'Suez': city('Suez'),
-    'Asyut': city('Asyut'),
-    'Sohag': city('Sohag'),
-    'Beni Suef': city('Beni Suef'),
-    'Port Said': city('Port Said'),
     'Cairo': city('Cairo'),
-    'Luxor': city('Luxor'),
-    'Giza': city('Giza'),
-    'Alexandria': city('Alexandria'),
-    'Aswan': city('Aswan'),
-    'Sharm El-Sheikh': city('Sharm El-Sheikh'),
-    'Hurghada': city('Hurghada'),
-    'Marsa Matruh': city('Marsa Matruh'),
+'Luxor': city('Luxor'),
+'Giza': city('Giza'),
+'Alexandria': city('Alexandria'),
+ 'Suez': city('Suez'),
+ 'Cara': city('Cara'),
+ 'Tobuk': city('Tobuk'),
+'Derna': city('Derna'),
+    # 'Ismailia': city('Ismailia'),
+   
+    # 'Asyut': city('Asyut'),
+    # 'Sohag': city('Sohag'),
+    # 'Beni Suef': city('Beni Suef'),
+    # 'Port Said': city('Port Said'),
+    # 'Cairo': city('Cairo'),
+    # 'Luxor': city('Luxor'),
+    # 'Giza': city('Giza'),
+    # 'Alexandria': city('Alexandria'),
+    # 'Aswan': city('Aswan'),
+    # 'Sharm El-Sheikh': city('Sharm El-Sheikh'),
+    # 'Hurghada': city('Hurghada'),
+    # 'Marsa Matruh': city('Marsa Matruh'),
     }
 
 
@@ -93,46 +101,55 @@ graph = graph()
 
 for node in  city_list.values():
     graph.add_node(node)
+graph.add_edge('Cairo', 'Luxor', 6)
+graph.add_edge('Cairo', 'Giza', 9)
+graph.add_edge('Luxor', 'Alexandria', 4)
+graph.add_edge('Giza', 'Alexandria', 2)
+graph.add_edge('Alexandria', 'Suez', 10)
+graph.add_edge('Suez', 'Cario', 4)
+graph.add_edge('Suez', 'Cara', 13)
+graph.add_edge('Suez', 'Tobuk', 10)
+graph.add_edge('Derna', 'Tobuk', 10)
 
-graph.add_edge('Cairo', 'Asyut', 5)
-graph.add_edge('Luxor', 'Aswan', 3)
-graph.add_edge('Giza', 'Beni Suef', 2)
-graph.add_edge('Alexandria', 'Marsa Matruh', 4)
-graph.add_edge('Suez', 'Ismailia', 1)
-graph.add_edge('Port Said', 'Ismailia', 2)
-graph.add_edge('Sharm El-Sheikh', 'Hurghada', 5)
-graph.add_edge('Aswan', 'Sohag', 4)
-graph.add_edge('Marsa Matruh', 'Alexandria', 3)  
-graph.add_edge('Sohag', 'Asyut', 3)
+# graph.add_edge('Cairo', 'Asyut', 18)
+# graph.add_edge('Luxor', 'Aswan', 13)
+# graph.add_edge('Giza', 'Beni Suef', 12)
+# graph.add_edge('Alexandria', 'Marsa Matruh', 14)
+# graph.add_edge('Suez', 'Ismailia', 11)
+# graph.add_edge('Port Said', 'Ismailia', 20)
+# graph.add_edge('Sharm El-Sheikh', 'Hurghada', 25)
+# graph.add_edge('Aswan', 'Sohag', 18)
+# graph.add_edge('Marsa Matruh', 'Alexandria', 14)  
+# graph.add_edge('Sohag', 'Asyut', 13)
 
 
 graph.set_militarybase()
 graph.print_all_nodes_data()
+print(graph.spawn_aliens(graph.dfs('Cairo', 'Alexandria')))
 
+# # Create a NetworkX graph
+# G = nx.Graph()
 
-"""# Create a NetworkX graph
-G = nx.Graph()
+# # Add nodes to the graph
+# for node in graph.nodes.values():
+#     G.add_node(node.state)
 
-# Add nodes to the graph
-for node in graph.nodes.values():
-    G.add_node(node.state)
+# # Add edges to the graph
+# for node_state, node in graph.nodes.items():
+#     for neighbor, distance in node.actions:
+#         G.add_edge(node_state, neighbor, weight=distance)
 
-# Add edges to the graph
-for node_state, node in graph.nodes.items():
-    for neighbor, distance in node.actions:
-        G.add_edge(node_state, neighbor, weight=distance)
+# # Draw the graph
+# pos = nx.spring_layout(G)  # Positions for all nodes
+# nx.draw(G, pos, with_labels=True, node_size=600, node_color="skyblue", font_size=6, font_weight="bold")
 
-# Draw the graph
-pos = nx.spring_layout(G)  # Positions for all nodes
-nx.draw(G, pos, with_labels=True, node_size=5000, node_color="skyblue", font_size=10, font_weight="bold")
+# # Add edge labels
+# edge_labels = {(u, v): d['weight'] for u, v, d in G.edges(data=True)}
+# nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
 
-# Add edge labels
-edge_labels = {(u, v): d['weight'] for u, v, d in G.edges(data=True)}
-nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
-
-# Show the graph
-plt.title('Graph Visualization')
-plt.show()"""
+# # Show the graph
+# plt.title('Graph Visualization')
+# plt.show()
 
 
 
