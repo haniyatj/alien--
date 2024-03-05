@@ -40,17 +40,17 @@ class Graph:
         path = self.dfs_helper(start, end, [])
         return path
 
-    def dfs_helper(self, current, end, path):  
+    def dfs_helper(self, current, end, route):  
         if current == end:
-            return path + [current]
+            return route + [current]
 
         self.nodes[current].visited = True
 
         for neighbor, _ in self.nodes[current].actions:
             if not self.nodes[neighbor].visited:
-                new_path = self.dfs_helper(neighbor, end, path + [current])
-                if new_path:
-                    return new_path
+                new_route = self.dfs_helper(neighbor, end, route + [current])
+                if new_route:
+                    return new_route
 
         return None  
 
