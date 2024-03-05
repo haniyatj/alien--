@@ -28,7 +28,7 @@ class Graph:
             self.nodes[city2].actions.append((city1, distance))
        
 
-    def dfs(self,start,end): #under consrtuciton gpted
+    def dfs(self,start,end):
         if start not in self.nodes or end not in self.nodes:
            print("No such start and end node found in graph")
            return None
@@ -54,7 +54,7 @@ class Graph:
 
         return None  
 
-    def calculate_heuristic(self, city, goal, total_civilians_encountered):
+    def calculate_heuristic(self, city, goal):
         # Initialize heuristic value
         heuristic = 0
         
@@ -72,35 +72,58 @@ class Graph:
         
         # Update the heuristic value for the city
         city.heuristic_val = heuristic
+        # military_factor = 0.5 * city.aliens if city.military else 0
+        # if city.aliens ==0:
+        #    city.heuristic_val =3 * city.civilians
+        # else:
+        #     city.heuristic_val = city.aliens + 2 * city.civilians + military_factor
 
 
     def find_path(self, start, goal):
-        # Initialize total civilians encountered and the priority queue
-        total_civilians_encountered = sum(city.civilians for city in self.nodes.values())
+        extra_resource = self.nodes['Alexandria'].aliens * 3
         frontier = []
+        heapq.heapify(frontier)
         heapq.heappush(frontier, (0, self.nodes[start]))  # (priority, city)
 
         came_from = {start: None}
-        cost_so_far = {start: 0}
+        cost_so_far = {start:0 }
+        resources_so_far = {start:extra_resource}  
 
         while frontier:
             current_priority, current_city = heapq.heappop(frontier)
-
+            if (current_city.aliens):
+              resources_so_far[current_city.state] = extra_resource-current_city.aliens
+            if current_city.aliens > extra_resource:
+                break
             if current_city.state == goal:
                 break
-
+            print('current city:',current_city.state, resources_so_far[current_city.state] )
             for next_state, distance in current_city.actions:
                 new_cost = cost_so_far[current_city.state] + distance
+                #  potential remaining resources if move to nextcity
+                potential_remaining_resources = resources_so_far[current_city.state] - self.nodes[next_state].aliens
+                print('next-satte',next_state,'potential_remaining_resources:',potential_remaining_resources)
+                # Skip  neighbor / use too many resources before reaching Alex
+                if potential_remaining_resources < 0 and next_state != goal:
+                    continue
+
+                if (next_state ==goal and potential_remaining_resources < 0):
+                    continue
+
                 if next_state not in cost_so_far or new_cost < cost_so_far[next_state]:
                     cost_so_far[next_state] = new_cost
-                    self.calculate_heuristic(self.nodes[next_state], goal, total_civilians_encountered)
+                    self.calculate_heuristic(self.nodes[next_state], goal)
                     priority = new_cost + self.nodes[next_state].heuristic_val
                     heapq.heappush(frontier, (priority, self.nodes[next_state]))
                     came_from[next_state] = current_city.state
-
+                    resources_so_far[next_state] = resources_so_far[current_city.state] - self.nodes[next_state].aliens
+                    print('resourceso currentcity',current_city.state,resources_so_far[current_city.state],'resources_so_far next state:',next_state,resources_so_far[next_state])
+        print('resourcessofar',resources_so_far)
+        if goal not in came_from:
+            print("No path found due to exceeding alien count limit and limited resources.")
+            return []  
         return self.reconstruct_path(came_from, start, goal)
-
-
+    
     def reconstruct_path(self, came_from, start, goal):
         current = goal
         path = []
@@ -111,14 +134,12 @@ class Graph:
         path.reverse()
         return path
 
-    def spawn_aliens(self, route): #spawn random aliens bw 10-80 on dfs path nodes
+    def spawn_aliens(self, route): #spawn random aliens dfs path nodes
         for node_state in route:
-
-            self.nodes[node_state].aliens = random.randint(10, 80)
-          #  print(self.nodes[node].aliens,self.nodes[node].state,self.nodes[node].military)    
+            self.nodes[node_state].aliens = random.randint(100, 900)   
             if (node_state == 'Alexandria'):
-                 self.military_resources = self.nodes[node_state].aliens + (self.nodes[node_state].aliens*3)#setting military resource
-
+                self.military_resources = self.nodes[node_state].aliens + (self.nodes[node_state].aliens*3)#setting military resource
+      
     def set_military_bases(self, percentage=70):
         num_militaryBases = int(len(self.nodes) * (percentage / 100))
         cities = [city for city_name, city in self.nodes.items() if city_name != 'Alexandria']
@@ -128,7 +149,46 @@ class Graph:
 
     def set_civilians(self):
         for city in self.nodes.values():
-            city.civilians = random.randint(100, 800)
+            city.civilians = random.randint(100, 900)
+
+
+    def print_all_nodes_data(self):
+        for name, city_obj in self.nodes.items():
+            print(f"State: {name}")
+            print(f"Number of Civilians: {city_obj.civilians}")
+            if city_obj.military:
+                print(f"State has a military base")
+            if city_obj.aliens > 0:
+                print(f"Number of Aliens attacking: {city_obj.aliens}")
+            print('Neighbouring cities:',city_obj.actions)
+            print("---------------------------------------")
+
+    def print_alien_attack_patter(self, path,start,end):
+        print("Alien attack pattern:",path)
+        print("---------------------------------------")
+        print("Troops movement starts from ",start,"and ends at ",end)
+        print("---------------------------------------")
+
+    def print_result(self,path2):
+        if(path2!=[]):
+            print("Optimised path for troops till Alexendria:", path2)
+            print("---------------------------------------")
+            # Update military resources tracking
+            remaining_resources = self.military_resources
+            for city_name in path2:
+                city = self.nodes[city_name]
+                if(city_name=='Alexandria'):
+                    print("Alexandria has been saved.Troops have successfully defeated the aliens!")
+                    break
+                print("Troops are in ",city_name,'(',city.aliens,"aliens).Military resource:",remaining_resources)
+                remaining_resources -= city.aliens
+                if (city.aliens != 0 ):
+                    print(city_name," saved.Troops remaining military resources:",remaining_resources)
+                else :
+                    print("Troops are moving to next city.")
+            
+            #print("Remaining military resources upon reaching Alexandria:", remaining_resources)
+
 
 
 G = Graph()
@@ -141,9 +201,8 @@ city_list = {
     'Cara': City('Cara'),
     'Tobuk': City('Tobuk'),
     'Derna': City('Derna'),
-   'Asyut': City('Asyut'),
-     'Sohag': City('Sohag'),
-
+    'Asyut': City('Asyut'),
+    'Sohag': City('Sohag'),
     }
 
 
@@ -155,39 +214,29 @@ G.add_edge('Cairo', 'Luxor', 6)
 G.add_edge('Cairo', 'Giza', 9)
 G.add_edge('Cairo', 'Suez', 10)
 G.add_edge('Cairo', 'Cara', 18)
-
 G.add_edge('Luxor', 'Giza', 4)
 G.add_edge('Luxor', 'Tobuk', 20)
 G.add_edge('Suez', 'Cara', 10)
 G.add_edge('Suez', 'Asyut', 12)
 G.add_edge('Cara', 'Asyut', 13)
-
 G.add_edge('Tobuk', 'Derna', 16)
 G.add_edge('Tobuk', 'Sohag', 20)
 G.add_edge('Sohag', 'Asyut', 22)
-
 G.add_edge('Asyut', 'Alexandria', 22)
 G.add_edge('Sohag', 'Alexandria', 22)
 G.add_edge('Derna', 'Alexandria', 22)
+G.add_edge('Cairo', 'Sohag', 28)
 
 
 
 G.set_military_bases()
 G.set_civilians()
+G.print_all_nodes_data()
 path=G.dfs('Cairo', 'Alexandria')
 G.spawn_aliens(path)
+G.print_alien_attack_patter(path,start='Luxor',end='Alexandria')
 path2 = G.find_path('Luxor', 'Alexandria')
-
-print("Optimised path till alexendria:", path2)
-
-
-# Update military resources tracking
-remaining_resources = G.military_resources
-for city in path2:
-    if city in G.nodes:
-        remaining_resources -= G.nodes[city].aliens
-
-print("Remaining military resources upon reaching Alexandria:", remaining_resources)
+G.print_result(path2)
 
 # Create a NetworkX graph
 Gp = nx.Graph()
@@ -216,10 +265,3 @@ nx.draw_networkx_edge_labels(Gp, pos, edge_labels=edge_labels)
 # Show the graph
 plt.title('Graph Visualization')
 plt.show()
-
-
-
-
-
-
-
